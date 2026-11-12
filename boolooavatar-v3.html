@@ -34,7 +34,7 @@ img.p{width:46px}.p{position:absolute;bottom:0;font-size:34px;animation:fl 1.8s 
 @keyframes zm{50%{transform:scale(1.4)}}
 </style></head><body><main>
 <div id="stage"><div id="bob"><div id="av"><img id="im" alt=""><video id="vd" muted playsinline></video></div></div><p id="ph">برای شروع فایل اضافه کنید</p><div id="badge">—</div></div>
-<div class="bar"><button id="mic">🎤 روشن کردن میکروفون</button><button id="cl">🧼 فقط اواتار (H)</button><button id="pl">🎮 حالت بازی (P)</button><label class="row">پس‌زمینه <input type="color" id="bg" value="#00b140"></label><label class="btn">🖼️ تصویر پس‌زمینه<input type="file" id="bgf" accept="image/*" hidden></label><button id="bgx">✕</button></div>
+<div class="bar"><button id="lg">EN</button><button id="mic">🎤 روشن کردن میکروفون</button><button id="cl">🧼 فقط اواتار (H)</button><button id="pl">🎮 حالت بازی (P)</button><label class="row">پس‌زمینه <input type="color" id="bg" value="#00b140"></label><label class="btn">🖼️ تصویر پس‌زمینه<input type="file" id="bgf" accept="image/*" hidden></label><button id="bgx">✕</button></div>
 <div class="bar" id="rx"></div>
 <div class="bar" id="cb"></div>
 <section class="card"><div class="meter"><i id="lv"></i></div>
@@ -188,7 +188,7 @@ function connectRoom(){
   const T='boolooavatar/'+room;
   const st=()=>{const n=mqs.filter(c=>c.connected).length;$('rs').textContent=n?'متصل ✓ ('+n+' سرور)':'در حال اتصال…'};
   BROKERS.forEach(u=>{
-    const c=mqtt.connect(u,{clientId:'bla_'+Math.random().toString(16).slice(2,10),reconnectPeriod:2000,connectTimeout:8000,keepalive:20,queueQoSZero:false});
+    const c=mqtt.connect(u,{clientId:'bla_'+Math.random().toString(16).slice(2,10),reconnectPeriod:5000,connectTimeout:8000,keepalive:20,queueQoSZero:false});
     mqs.push(c);
     c.on('connect',()=>{c.subscribe(T+'/cmd');st()});
     c.on('close',st);c.on('error',()=>{});
@@ -198,8 +198,72 @@ function connectRoom(){
   st();
 }
 addEventListener('online',()=>{if(room)connectRoom()});
+fetch('/ping').then(r=>r.ok?r.text():'').then(t=>{
+  if(t!=='boolooavatar')return;
+  clearInterval(hbT);mqs.forEach(c=>{try{c.end(true)}catch(e){}});mqs=[];room='';
+  $('rc').onclick=()=>{};$('rt').disabled=true;$('rt').placeholder='حالت محلی: نیازی به کد نیست';
+  const es2=new EventSource('/events');
+  es2.onopen=()=>$('rs').textContent='متصل محلی ✓';
+  es2.onerror=()=>$('rs').textContent='در حال اتصال محلی…';
+  es2.onmessage=ev=>{try{doMsg(JSON.parse(ev.data));$('rs').textContent='متصل محلی ✓ پیام: '+new Date().toLocaleTimeString()}catch(e){}};
+}).catch(()=>{});
 $('rc').onclick=connectRoom;
 {let t=new URLSearchParams(location.search).get('room');try{t=t||localStorage.getItem('rt')}catch(e){}if(t){$('rt').value=t;connectRoom()}}
 if(REACTIONS)for(let i=0;i<5;i++){const b=document.createElement('button');b.textContent='🎬 '+(i+1);b.onclick=()=>playClip(i);$('cb').append(b)}else $('cb').remove();
 render();renderRx();setState('idle',true);frame();
+/* ===== i18n (fa/en) ===== */
+const I18N=[
+['برای شروع فایل اضافه کنید','Add files to get started'],
+['روشن کردن میکروفون','Turn on microphone'],['میکروفون روشنه','Microphone on'],
+['فقط اواتار','Avatar only'],['حالت بازی','Playing mode'],['روشن/خاموش حالت بازی','Toggle playing mode'],
+['پس‌زمینه','Background'],['تصویر پس‌زمینه','Background image'],
+['آستانه حرف زدن','Talking threshold'],['آستانه جیغ','Screaming threshold'],
+['جنبیدن اواتار با صدا','Avatar moves with voice'],['کنترل از راه دور','Remote control'],
+['کد اتاق رو همون کدی بذارید که توی صفحه اصلی نوشتید.','Use the same room code you typed on the main page.'],
+['کد اتاق رو بنویسید و ذخیره بزنید','Type the room code and press Save'],
+['کد اتاق','Room code'],['یه کد طولانی و مخصوص بنویسید','Type a long, unique code'],
+['حالت محلی: نیازی به کد نیست','Local mode: no code needed'],
+['در حال اتصال به سرور','Connecting to server'],['در حال اتصال محلی','Connecting (local)'],['در حال اتصال','Connecting'],
+['اتصال','Connect'],['متصل محلی','Connected (local)'],['متصل','Connected'],['پیام:','message:'],['سرور','servers'],['قطع','Disconnected'],
+['کتابخانه لود نشد (اینترنت رو بررسی کنید)','Library failed to load (check your internet)'],
+['کتابخانه لود نشد، اینترنت رو بررسی کنید','Library failed to load, check your internet'],
+['فایل‌ها داخل مرورگر همین دستگاه ذخیره می‌شن و بعد از بستن صفحه هم می‌مونن.',"Files are saved in this device's browser and stay after you close the page."],
+['بیکار','Idle'],['حرف زدن','Talking'],['بازی','Playing'],['جیغ','Screaming'],
+['ریکشن‌های سفارشی','Custom reactions'],['ریکشن','Reaction'],
+['ایموجی، تصویر و صدای دلخواه','Emoji, image and your own sound'],
+['ایموجی‌ها','Emoji'],['کلیپ‌ها','Clips'],['کلیپ','Clip'],['تمام اواتار','full avatar'],
+['افزودن تصویر/ویدیو','Add image/video'],['تصویر','Image'],['صدا','Sound'],
+['دسترسی به میکروفون ممکن نشد. اجازه دسترسی رو بررسی کنید.','Could not access the microphone. Please check the permission.'],
+['ذخیره','Save'],['ویرایش برچسب‌ها','Edit labels'],['صفحه اصلی آنلاینه','Main page is online'],['(حالت محلی)','(local mode)'],
+['به سرور وصلم ولی صفحه اصلی پیدا نشد (کد اتاق یکی باشه و صفحه اصلی باز و متصل باشه)','Connected to the server but the main page was not found (use the same room code and keep the main page open and connected)'],
+['به کامپیوتر وصلم ولی صفحه اصلی باز نیست','Connected to the computer but the main page is not open'],
+['به کامپیوتر وصل نیستم','Not connected to the computer'],['هنوز به سرور وصل نیستم','Not connected to the server yet'],
+['ارسال شد','Sent'],['خطا','Error'],['ریموت','Remote']
+];
+const nz=s=>s.replace(/\u200c/g,'');
+const DICT=I18N.map(([a,b])=>[nz(a),b]).sort((x,y)=>y[0].length-x[0].length);
+function trStr(s){let n=nz(s),ch=false;for(const[a,b]of DICT)if(n.includes(a)){n=n.split(a).join(b);ch=true}
+  return ch?n.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)):s}
+let LANG='fa';try{LANG=localStorage.getItem('lang')||'fa'}catch(e){}
+{const q=new URLSearchParams(location.search).get('lang');if(q==='en'||q==='fa')LANG=q}
+const TITLE0=document.title,txRec=new WeakMap(),atRec=new WeakMap();
+function fixTx(n){const p=n.parentNode;if(!p||/^(SCRIPT|STYLE|TEXTAREA)$/.test(p.nodeName))return;
+  let r=txRec.get(n);if(!r||n.nodeValue!==r.shown){r={fa:n.nodeValue};txRec.set(n,r)}
+  const v=LANG==='en'?trStr(r.fa):r.fa;r.shown=v;if(n.nodeValue!==v)n.nodeValue=v}
+function fixAt(e){if(!e.getAttribute)return;const c=e.getAttribute('placeholder');if(c==null)return;
+  let r=atRec.get(e);if(!r||c!==r.shown){r={fa:c};atRec.set(e,r)}
+  const v=LANG==='en'?trStr(r.fa):r.fa;r.shown=v;if(c!==v)e.setAttribute('placeholder',v)}
+function walkTx(root){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())fixTx(n);
+  if(root.querySelectorAll)root.querySelectorAll('[placeholder]').forEach(fixAt)}
+function setLang(l){LANG=l;try{localStorage.setItem('lang',l)}catch(e){}
+  document.documentElement.lang=l;document.documentElement.dir=l==='fa'?'rtl':'ltr';
+  document.title=l==='en'?trStr(TITLE0):TITLE0;walkTx(document.body);$('lg').textContent=l==='fa'?'EN':'فا'}
+new MutationObserver(ms=>ms.forEach(m=>{
+  if(m.type==='characterData')fixTx(m.target);
+  else if(m.type==='attributes')fixAt(m.target);
+  else m.addedNodes.forEach(nd=>nd.nodeType===3?fixTx(nd):nd.nodeType===1&&walkTx(nd))
+})).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['placeholder']});
+{const _al=window.alert.bind(window);window.alert=m=>_al(LANG==='en'?trStr(String(m)):m)}
+$('lg').onclick=()=>setLang(LANG==='fa'?'en':'fa');
+setLang(LANG);
 </script></body></html>

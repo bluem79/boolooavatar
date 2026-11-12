@@ -76,6 +76,16 @@ nav a{color:var(--ac);margin-inline-end:14px}
 <li><code>P</code> playing mode · <code>H</code> avatar-only mode · <code>1</code>–<code>5</code> emoji reactions · <code>Q W E R T</code> clip reactions</li>
 </ul>
 
+<h2>Option B: Local mode (no limits, no internet relay)</h2>
+<p class="note"><b>Windows without Python:</b> put <code>server.ps1</code> and <code>start-windows.bat</code> in the same folder as the other files, then double-click <code>start-windows.bat</code> and accept the administrator prompt. Nothing needs to be installed. Use it instead of steps 2 and 3 below. If Windows shows a blue SmartScreen warning, choose <b>More info → Run anyway</b>.</p>
+<p>If you want a remote with no third-party limits at all, run the small local server on your PC. Your phone and PC must be on the same Wi-Fi.</p>
+<ol>
+<li>Put <code>server.py</code>, <code>boolooavatar-v3.html</code> and <code>remote.html</code> in one folder on your PC.</li>
+<li>Install Python from python.org if you do not have it (on Windows tick <b>Add Python to PATH</b>).</li>
+<li>Open a terminal in that folder and run <code>python server.py</code>. Keep the window open. Allow it through the firewall if Windows asks (private networks).</li>
+<li>The window prints your addresses. On the PC open <code>http://localhost:8765/</code>. In OBS use <code>http://localhost:8765/#clean</code>. On your phone open <code>http://YOUR-PC-IP:8765/remote</code> (the exact address is printed).</li>
+<li>No room code is needed in this mode. The status text says <b>Connected (local)</b>. Upload your avatar files again once, because this address has its own storage.</li>
+</ol>
 <h2>Good to know</h2>
 <ul>
 <li>The room code and the Remote only work when the files are hosted by you (GitHub Pages) or opened locally. They do not work inside pages hosted on claude.ai.</li>
@@ -145,6 +155,16 @@ nav a{color:var(--ac);margin-inline-end:14px}
 <li><code>P</code> حالت بازی · <code>H</code> حالت فقط اواتار · <code>1</code> تا <code>5</code> ریکشن ایموجی · <code>Q W E R T</code> ریکشن کلیپ</li>
 </ul>
 
+<h2>روش B: حالت محلی (بدون هیچ محدودیتی)</h2>
+<p class="note"><b>ویندوز بدون Python:</b> فایل‌های <code>server.ps1</code> و <code>start-windows.bat</code> رو هم کنار بقیه فایل‌ها توی همون پوشه بذارید و روی <code>start-windows.bat</code> دابل‌کلیک کنید و اجازه ادمین رو بدید. چیزی نیاز به نصب نداره. به‌جای قدم‌های ۲ و ۳ زیر ازش استفاده کنید. اگه ویندوز هشدار آبی SmartScreen نشون داد، <b>More info ← Run anyway</b> رو بزنید.</p>
+<p>اگه ریموتی می‌خواید که هیچ محدودیتی از سرویس بیرونی نداشته باشه، سرور کوچیک محلی رو روی کامپیوتر اجرا کنید. گوشی و کامپیوتر باید به یه وای‌فای وصل باشن.</p>
+<ol>
+<li>فایل‌های <code>server.py</code>، <code>boolooavatar-v3.html</code> و <code>remote.html</code> رو توی یه پوشه روی کامپیوتر بذارید.</li>
+<li>اگه Python ندارید از python.org نصب کنید (توی ویندوز تیک <b>Add Python to PATH</b> رو بزنید).</li>
+<li>توی همون پوشه یه ترمینال باز کنید و <code>python server.py</code> رو اجرا کنید. پنجره رو باز نگه دارید. اگه ویندوز درباره فایروال پرسید، اجازه بدید (شبکه خصوصی).</li>
+<li>پنجره آدرس‌ها رو چاپ می‌کنه. روی کامپیوتر <code>http://localhost:8765/</code> رو باز کنید. توی OBS آدرس <code>http://localhost:8765/#clean</code> رو بذارید. روی گوشی <code>http://IP-کامپیوتر:8765/remote</code> رو باز کنید (آدرس دقیق چاپ می‌شه).</li>
+<li>توی این حالت کد اتاق لازم نیست و وضعیت «متصل محلی ✓» رو نشون می‌ده. فایل‌های اواتار رو یه بار دوباره آپلود کنید، چون این آدرس حافظه جداگانه داره.</li>
+</ol>
 <h2>نکته‌ها</h2>
 <ul>
 <li>کد اتاق و ریموت فقط وقتی کار می‌کنن که فایل‌ها رو خودتون هاست کرده باشید (GitHub Pages) یا از روی کامپیوتر باز کنید. روی صفحه‌های هاست‌شده داخل claude.ai کار نمی‌کنن.</li>
