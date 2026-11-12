@@ -32,7 +32,7 @@ let bc=null;try{bc=new BroadcastChannel('salavatar')}catch(e){}
 function send(m){
   if(navigator.vibrate)navigator.vibrate(25);
   if(room)fetch('https://ntfy.sh/'+encodeURIComponent(room),{method:'POST',body:JSON.stringify(m)})
-    .then(()=>$('st').textContent='✓ ارسال شد').catch(()=>$('st').textContent='✗ ارسال نشد، اینترنت رو بررسی کنید');
+    .then(r=>{$('st').textContent=r.ok?'✓ ارسال شد '+new Date().toLocaleTimeString():'✗ خطا '+r.status+(r.status===429?' (سقف ارسال رایگان پر شده، چند دقیقه صبر کنید)':'')}).catch(()=>$('st').textContent='✗ ارسال نشد، اینترنت رو بررسی کنید');
   else if(bc){bc.postMessage(m);$('st').textContent='✓ ارسال شد (فقط همین مرورگر)'}
 }
 function draw(){

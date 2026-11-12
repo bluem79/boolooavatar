@@ -176,6 +176,26 @@ function connectRoom(){
     es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.event==='message')doMsg(JSON.parse(d.message))}catch(e){}}}
   catch(e){$('rs').textContent='خطا'}
 }
+let ws=null,wsT=0,wsLast=0,room='';const seen=new Set();
+function connectRoom(){
+  room=$('rt').value.trim();try{localStorage.setItem('rt',room)}catch(e){}
+  clearTimeout(wsT);if(ws){const o=ws;ws=null;try{o.close()}catch(e){}}
+  if(!room){$('rs').textContent='قطع';return}
+  wsOpen();
+}
+function wsOpen(){
+  $('rs').textContent='در حال اتصال…';wsLast=Date.now();
+  let w;try{w=new WebSocket('wss://ntfy.sh/'+encodeURIComponent(room)+'/ws')}catch(e){$('rs').textContent='خطا';return}
+  ws=w;
+  w.onopen=()=>{if(w===ws){$('rs').textContent='متصل ✓';wsLast=Date.now()}};
+  w.onmessage=ev=>{wsLast=Date.now();try{const d=JSON.parse(ev.data);if(d.event!=='message'||seen.has(d.id))return;seen.add(d.id);
+    doMsg(JSON.parse(d.message));$('rs').textContent='متصل ✓ پیام: '+new Date().toLocaleTimeString()}catch(e){}};
+  w.onclose=()=>{if(w!==ws)return;$('rs').textContent='قطع شد، تلاش دوباره…';wsT=setTimeout(wsOpen,1500)};
+  w.onerror=()=>{try{w.close()}catch(e){}};
+}
+setInterval(()=>{if(ws&&Date.now()-wsLast>100000){try{ws.close()}catch(e){}}},10000);
+addEventListener('online',()=>{if(room)connectRoom()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&room&&(!ws||ws.readyState>1))connectRoom()});
 $('rc').onclick=connectRoom;
 {let t=new URLSearchParams(location.search).get('room');try{t=t||localStorage.getItem('rt')}catch(e){}if(t){$('rt').value=t;connectRoom()}}
 if(REACTIONS)for(let i=0;i<5;i++){const b=document.createElement('button');b.textContent='🎬 '+(i+1);b.onclick=()=>playClip(i);$('cb').append(b)}else $('cb').remove();
