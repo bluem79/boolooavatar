@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boolooavatar Web v3</title>
+<style>
+:root{--bg:#f6f5f2;--cd:#fff;--tx:#1d1d1b;--mu:#6b6b66;--ac:#6d4aff;--bd:#e3e1db;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15151a;--cd:#1f1f27;--tx:#f0eff5;--mu:#9a99a8;--bd:#33333f}}
+:root[data-theme=dark]{--bg:#15151a;--cd:#1f1f27;--tx:#f0eff5;--mu:#9a99a8;--bd:#33333f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 system-ui,Tahoma,sans-serif}
+main{max-width:640px;margin:auto;padding:12px;display:grid;gap:10px}
+#stage{position:relative;height:52vh;min-height:260px;border-radius:16px;background:#00b140;overflow:hidden;display:grid;place-items:center}
+#bob{height:100%;width:100%;display:grid;place-items:center;transition:transform .06s}
+#av{height:100%;width:100%;display:grid;place-items:center}
+#im,#vd{display:none;max-width:100%;max-height:100%;object-fit:contain}
+#ph{position:absolute;color:#fff;margin:0;text-shadow:0 1px 4px #0006}
+#badge{position:absolute;top:8px;inset-inline-start:8px;background:#0007;color:#fff;border-radius:99px;padding:2px 10px;font-size:12px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,.btn{font:inherit;background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;cursor:pointer}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:12px;display:grid;gap:8px}
+h3{margin:0;font-size:15px}small{color:var(--mu);font-weight:400}
+.th{display:flex;gap:6px;flex-wrap:wrap}.t{position:relative;width:56px;height:56px;border-radius:8px;overflow:hidden;background:var(--bd)}
+.t img,.t video{width:100%;height:100%;object-fit:cover}
+.t button{position:absolute;top:0;inset-inline-start:0;padding:0 6px;border-radius:0 0 8px 0;line-height:18px;background:#000a;color:#fff;border:0}
+.meter{height:10px;background:var(--bd);border-radius:9px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:var(--ac)}
+label{display:grid;gap:2px;color:var(--mu);font-size:13px}label.row{display:flex;gap:8px;align-items:center}
+body.clean main>*:not(#stage){display:none}body.clean main{max-width:none;padding:0}body.clean #stage{height:100vh;border-radius:0}body.clean #badge{display:none}
+img.p{width:46px}.p{position:absolute;bottom:0;font-size:34px;animation:fl 1.8s ease-out forwards;pointer-events:none}
+@keyframes fl{to{transform:translateY(-48vh) rotate(20deg);opacity:0}}
+.a-bounce{animation:bn .5s}.a-shake{animation:sk .5s}.a-pulse{animation:pu .6s}.a-zoom{animation:zm .5s}
+@keyframes bn{40%{transform:translateY(-30px)}70%{transform:translateY(0)}85%{transform:translateY(-10px)}}
+@keyframes sk{20%,60%{transform:translateX(-14px)}40%,80%{transform:translateX(14px)}}
+@keyframes pu{50%{transform:scale(1.15)}}
+@keyframes zm{50%{transform:scale(1.4)}}
+</style></head><body><main>
+<div id="stage"><div id="bob"><div id="av"><img id="im" alt=""><video id="vd" muted playsinline></video></div></div><p id="ph">برای شروع فایل اضافه کنید</p><div id="badge">—</div></div>
+<div class="bar"><button id="mic">🎤 روشن کردن میکروفون</button><button id="cl">🧼 فقط اواتار (H)</button><button id="pl">🎮 حالت بازی (P)</button><label class="row">پس‌زمینه <input type="color" id="bg" value="#00b140"></label><label class="btn">🖼️ تصویر پس‌زمینه<input type="file" id="bgf" accept="image/*" hidden></label><button id="bgx">✕</button></div>
+<div class="bar" id="rx"></div>
+<div class="bar" id="cb"></div>
+<section class="card"><div class="meter"><i id="lv"></i></div>
+<label>آستانه حرف زدن <input type="range" id="tk" min="1" max="100" value="12"></label>
+<label>آستانه جیغ <input type="range" id="sc" min="1" max="100" value="45"></label>
+<label class="row" id="bw"><input type="checkbox" id="bc" checked> جنبیدن اواتار با صدا</label></section>
+<section class="card" id="rm"><h3>کنترل از راه دور <small id="rs">قطع</small></h3><label class="row">کد اتاق <input id="rt" style="flex:1" placeholder="یه کد طولانی و مخصوص بنویسید"></label><button id="rc">اتصال</button></section>
+<section class="card" id="rxc"></section>
+<div id="slots"></div>
+<p style="color:var(--mu);font-size:12px;margin:0">فایل‌ها داخل مرورگر همین دستگاه ذخیره می‌شن و بعد از بستن صفحه هم می‌مونن.</p><p hidden>فایل‌ها فقط داخل مرورگر نگه داشته می‌شن و با بستن صفحه پاک می‌شن.</p>
+</main>
+<script>
+const REACTIONS=true;
+const $=id=>document.getElementById(id);
+const STATES=[['idle','بیکار','😶'],['talking','حرف زدن','🗣️'],['playing','بازی','🎮'],['screaming','جیغ','😱']];
+const NAMES={idle:'بیکار',talking:'حرف زدن',playing:'بازی',screaming:'جیغ'};
+const FB={screaming:'talking',talking:'idle',playing:'idle'};
+const files={idle:[],talking:[],playing:[],screaming:[]},lastIdx={};
+let cur=null,playing=false,lvl=0,hold=0,scrHold=0,analyser=null,buf=null;
+let db=null,ovr=false,ovrT=0;
+for(let i=0;i<5;i++)files['r'+i]=[];
+function endOvr(){clearTimeout(ovrT);ovr=false;cur=null}
+function playClip(i){const k='r'+i,a=files[k];if(!a||!a.length)return false;
+  let j=Math.floor(Math.random()*a.length);if(a.length>1&&j===lastIdx[k])j=(j+1+Math.floor(Math.random()*(a.length-1)))%a.length;
+  lastIdx[k]=j;const it=a[j];clearTimeout(ovrT);ovr=true;show(it,false);
+  ovrT=setTimeout(endOvr,it.v?30000:3000);$('badge').textContent='ریکشن';return true}
+const idb=(m,fn)=>new Promise(r=>{if(!db)return r();try{const t=db.transaction('f',m),q=fn(t.objectStore('f'));t.oncomplete=()=>r(q&&q.result);t.onerror=()=>r()}catch(e){r()}});
+const dbPut=o=>idb('readwrite',s=>s.put(o)),dbDel=id=>idb('readwrite',s=>s.delete(id)),dbAll=()=>idb('readonly',s=>s.getAll());
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function openDb(){return new Promise(r=>{try{const q=indexedDB.open('salavatar',1);q.onupgradeneeded=()=>q.result.createObjectStore('f',{keyPath:'id'});q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})}
+const im=$('im'),vd=$('vd'),ph=$('ph'),stage=$('stage'),av=$('av');
+const base=()=>playing?'playing':'idle';
+function pick(a){let i=Math.floor(Math.random()*a.length);if(a.length>1&&i===lastIdx[a]){}return i}
+function setState(s,force){
+  if(ovr||!s||(s===cur&&!force))return;cur=s;$('badge').textContent=NAMES[s];
+  let k=s;while(!files[k].length&&FB[k])k=FB[k];
+  const pool=files[k];if(!pool.length){show(null);return}
+  let i=Math.floor(Math.random()*pool.length);
+  if(pool.length>1&&i===lastIdx[k])i=(i+1+Math.floor(Math.random()*(pool.length-1)))%pool.length;
+  lastIdx[k]=i;show(pool[i],pool.length<2);
+}
+function show(it,loop){
+  if(!it){im.style.display=vd.style.display='none';vd.pause();ph.style.display='';return}
+  ph.style.display='none';
+  if(it.v){im.style.display='none';vd.style.display='block';vd.loop=loop;vd.src=it.url;vd.play().catch(()=>{})}
+  else{vd.pause();vd.style.display='none';im.style.display='block';im.src=it.url}
+}
+vd.onended=()=>{if(ovr)endOvr();else setState(cur,true)};
+setInterval(()=>{if(im.style.display==='block')setState(cur,true)},6000);
+function render(){
+  $('slots').innerHTML='';
+  STATES.concat(REACTIONS?RX.map((r,i)=>['r'+i,'ریکشن '+(i+1)+' – کلیپ تمام‌اواتار',r[0]]):[]).forEach(([k,n,e])=>{if(k[0]==='r'){n='کلیپ '+(+k[1]+1)+' – تمام اواتار';e='🎬'}
+    const c=document.createElement('section');c.className='card';
+    c.innerHTML=`<h3>${e} ${n} <small>${files[k].length}/5</small></h3><div class="th"></div><label class="btn" style="width:fit-content">＋ افزودن تصویر/ویدیو<input type="file" hidden multiple accept="image/*,video/*"></label>`;
+    const th=c.querySelector('.th');
+    files[k].forEach((f,i)=>{
+      const t=document.createElement('div');t.className='t';
+      t.innerHTML=f.v?`<video src="${f.url}" muted></video>`:`<img src="${f.url}" alt="">`;
+      const x=document.createElement('button');x.textContent='×';
+      x.onclick=()=>{URL.revokeObjectURL(f.url);dbDel(f.id);files[k].splice(i,1);render();setState(cur||base(),true)};
+      t.append(x);th.append(t)});
+    c.querySelector('input').onchange=ev=>{
+      for(const f of ev.target.files){if(files[k].length>=5)break;{const o={id:uid(),url:URL.createObjectURL(f),v:f.type.startsWith('video'),t:Date.now()};files[k].push(o);dbPut({id:o.id,k,blob:f,v:o.v,t:o.t})}}
+      render();setState(cur||base(),true)};
+    $('slots').append(c)});
+}
+$('pl').onclick=()=>{playing=!playing;$('pl').classList.toggle('on',playing)};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='p'||e.key==='P')$('pl').click();
+  if(REACTIONS&&RX[+e.key-1])react(RX[+e.key-1]);const ci='qwert'.indexOf(e.key.toLowerCase());if(REACTIONS&&ci>=0&&e.key.length===1)playClip(ci)});
+$('bg').oninput=e=>stage.style.backgroundColor=e.target.value;
+function setBg(u){stage.style.backgroundImage=u?`url(${u})`:'';stage.style.backgroundSize='cover';stage.style.backgroundPosition='center'}
+$('bgf').onchange=e=>{const f=e.target.files[0];if(!f)return;setBg(URL.createObjectURL(f));dbPut({id:'bgimg',k:'bgimg',blob:f,t:Date.now()})};
+$('bgx').onclick=()=>{setBg('');dbDel('bgimg')};
+$('mic').onclick=async()=>{
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    const ac=new AudioContext(),src=ac.createMediaStreamSource(st);analyser=ac.createAnalyser();analyser.fftSize=1024;
+    src.connect(analyser);buf=new Uint8Array(analyser.fftSize);$('mic').textContent='🎤 میکروفون روشنه';$('mic').classList.add('on');
+  }catch(e){alert('دسترسی به میکروفون ممکن نشد. اجازه دسترسی رو بررسی کنید.')}
+};
+function frame(){
+  if(analyser){analyser.getByteTimeDomainData(buf);let s=0;for(const b of buf){const v=(b-128)/128;s+=v*v}
+    const r=Math.sqrt(s/buf.length);lvl=Math.min(100,r*300)}
+  else lvl=0;
+  $('lv').style.width=lvl+'%';
+  const now=performance.now(),tk=+$('tk').value,sc=+$('sc').value,b=base();
+  let want=b;if(lvl>=sc){want='screaming';scrHold=now+500}else if(lvl>=tk)want='talking';
+  if(want!==b)hold=now+300;
+  if(want==='talking'&&cur==='screaming'&&now<scrHold)want='screaming';
+  if(want===b&&now<hold&&(cur==='talking'||cur==='screaming'))want=cur;
+  setState(want);
+  $('bob').style.transform=(REACTIONS&&$('bc').checked)?`translateY(${-lvl*0.5}px) scale(${1+lvl/500})`:'';
+  requestAnimationFrame(frame);
+}
+let RX=[];
+if(REACTIONS){
+  RX=[['❤️','a-pulse'],['😂','a-shake'],['😡','a-shake'],['👏','a-bounce'],['😮','a-zoom']];
+  try{JSON.parse(localStorage.getItem('rxe')||'[]').forEach((x,i)=>{if(x&&RX[i])RX[i][0]=x})}catch(e){}
+  buildRxBtns();
+}else{$('rx').remove();$('bw').remove()}
+function react(r){if(r.snd){const a=new Audio(r.snd);a.play().catch(()=>{})}
+  
+  for(let i=0;i<8;i++){const s=document.createElement(r.img?'img':'span');s.className='p';if(r.img)s.src=r.img;else s.textContent=r[0];
+    s.style.left=(8+Math.random()*80)+'%';s.style.animationDelay=Math.random()*.4+'s';stage.append(s);setTimeout(()=>s.remove(),2400)}
+  av.classList.remove('a-bounce','a-shake','a-pulse','a-zoom');void av.offsetWidth;av.classList.add(r[1]);
+}
+function buildRxBtns(){$('rx').innerHTML='';RX.forEach((r,i)=>{const b=document.createElement('button');b.textContent=`${r[0]} ${i+1}`;b.onclick=()=>react(r);$('rx').append(b)})}
+function setRx(i,t,f){const r=RX[i],id='rx'+t+i;if(r[t])URL.revokeObjectURL(r[t]);r[t]=URL.createObjectURL(f);dbPut({id,k:id,blob:f,t:Date.now()});renderRx()}
+function renderRx(){
+  const c=$('rxc');if(!REACTIONS){c&&c.remove();return}
+  c.innerHTML='<h3>ریکشن‌های سفارشی <small>ایموجی، تصویر و صدای دلخواه</small></h3>';
+  RX.forEach((r,i)=>{
+    const d=document.createElement('div');d.className='bar';
+    d.innerHTML=`<b>${i+1}</b><input value="${r[0]}" maxlength="4" style="width:56px"><label class="btn">🖼️ ${r.img?'✓':'تصویر'}<input type="file" hidden accept="image/*"></label><label class="btn">🔊 ${r.snd?'✓':'صدا'}<input type="file" hidden accept="audio/*"></label><button>✕</button>`;
+    const [t,fi,fs]=d.querySelectorAll('input'),x=d.querySelector('button');
+    t.oninput=()=>{r[0]=t.value||'⭐';try{localStorage.setItem('rxe',JSON.stringify(RX.map(q=>q[0])))}catch(e){}buildRxBtns();render()};
+    fi.onchange=()=>fi.files[0]&&setRx(i,'img',fi.files[0]);
+    fs.onchange=()=>fs.files[0]&&setRx(i,'snd',fs.files[0]);
+    x.onclick=()=>{['img','snd'].forEach(u=>{if(r[u]){URL.revokeObjectURL(r[u]);r[u]=null;dbDel('rx'+u+i)}});renderRx()};
+    c.append(d)})
+}
+openDb().then(dbAll).then(rows=>{(rows||[]).sort((a,b)=>a.t-b.t).forEach(o=>{const u=URL.createObjectURL(o.blob);if(files[o.k])files[o.k].push({id:o.id,url:u,v:o.v,t:o.t});else if(o.k==='bgimg')setBg(u);else{const m=/^rx(img|snd)(\d)$/.exec(o.k);if(m&&RX[m[2]])RX[m[2]][m[1]]=u}});render();renderRx();setState(base(),true)});
+const isClean=()=>document.body.classList.contains('clean');
+const setClean=on=>{document.body.classList.toggle('clean',on);try{history.replaceState(null,'',on?'#clean':location.pathname+location.search)}catch(e){}};
+$('cl').onclick=()=>setClean(true);
+stage.ondblclick=()=>isClean()&&setClean(false);
+stage.onclick=()=>{if(isClean()&&!analyser)$('mic').click()};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='h'||e.key==='H')setClean(!isClean())});
+addEventListener('hashchange',()=>setClean(location.hash==='#clean'));
+if(location.hash==='#clean')setClean(true);
+function doMsg(m){if(m.t==='react'&&RX[m.i])react(RX[m.i]);else if(m.t==='clip')playClip(m.i);else if(m.t==='play')$('pl').click()}
+try{new BroadcastChannel('salavatar').onmessage=e=>doMsg(e.data)}catch(e){}
+let es=null;
+function connectRoom(){
+  const t=$('rt').value.trim();try{localStorage.setItem('rt',t)}catch(e){}
+  if(es){es.close();es=null}if(!t){$('rs').textContent='قطع';return}
+  try{es=new EventSource('https://ntfy.sh/'+encodeURIComponent(t)+'/sse');
+    es.onopen=()=>$('rs').textContent='متصل ✓';es.onerror=()=>$('rs').textContent='در حال اتصال…';
+    es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.event==='message')doMsg(JSON.parse(d.message))}catch(e){}}}
+  catch(e){$('rs').textContent='خطا'}
+}
+$('rc').onclick=connectRoom;
+{let t=new URLSearchParams(location.search).get('room');try{t=t||localStorage.getItem('rt')}catch(e){}if(t){$('rt').value=t;connectRoom()}}
+if(REACTIONS)for(let i=0;i<5;i++){const b=document.createElement('button');b.textContent='🎬 '+(i+1);b.onclick=()=>playClip(i);$('cb').append(b)}else $('cb').remove();
+render();renderRx();setState('idle',true);frame();
+</script></body></html>

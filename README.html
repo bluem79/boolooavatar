@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boolooavatar – README</title>
+<style>
+:root{--bg:#f6f5f2;--cd:#fff;--tx:#1d1d1b;--mu:#6b6b66;--ac:#6d4aff;--bd:#e3e1db}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15151a;--cd:#1f1f27;--tx:#f0eff5;--mu:#9a99a8;--bd:#33333f}}
+:root[data-theme=dark]{--bg:#15151a;--cd:#1f1f27;--tx:#f0eff5;--mu:#9a99a8;--bd:#33333f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.7 system-ui,Tahoma,sans-serif}
+main{max-width:720px;margin:auto;padding:16px}
+section{background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:16px 20px;margin:0 0 16px}
+h1{font-size:24px;margin:8px 0}h2{font-size:18px;margin:20px 0 6px;color:var(--ac)}
+code{direction:ltr;unicode-bidi:isolate;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:1px 6px;font-size:14px;word-break:break-all}
+li{margin:4px 0}.note{color:var(--mu);font-size:14px}
+nav a{color:var(--ac);margin-inline-end:14px}
+</style></head><body><main>
+<nav><a href="#en">English</a><a href="#fa">فارسی</a></nav>
+
+<section id="en" dir="ltr" lang="en">
+<h1>Boolooavatar Web (v3)</h1>
+<p>A simple web avatar for streaming. Upload up to 5 images or videos for each state (idle, talking, playing, screaming) and they play at random. Talking and screaming are detected from your microphone. You can also trigger emoji reactions and full-avatar reaction clips, and control them from your phone.</p>
+
+<h2>Files</h2>
+<ul>
+<li><code>boolooavatar-v3.html</code>: the main avatar page.</li>
+<li><code>remote.html</code>: the phone remote control page.</li>
+</ul>
+
+<h2>Step 1: Put the files on GitHub (one time)</h2>
+<ol>
+<li>Create a free account at github.com.</li>
+<li>Click <b>New repository</b>. Name it <code>boolooavatar</code>, set it to <b>Public</b>, and click <b>Create repository</b>.</li>
+<li>Click <b>uploading an existing file</b> and upload both files. Do not rename them.</li>
+<li>Click <b>Commit changes</b>.</li>
+<li>Go to <b>Settings → Pages</b>. Under <b>Branch</b> choose <code>main</code> and click <b>Save</b>.</li>
+<li>Wait 1–2 minutes. Your addresses will be (replace <code>YOURNAME</code> with your GitHub username):
+<ul>
+<li>Main page: <code>https://YOURNAME.github.io/boolooavatar/boolooavatar-v3.html</code></li>
+<li>Remote: <code>https://YOURNAME.github.io/boolooavatar/remote.html</code></li>
+</ul></li>
+</ol>
+
+<h2>Step 2: Set up the main page (on your computer)</h2>
+<ol>
+<li>Open the main page in Chrome.</li>
+<li>Upload your avatar files into each state. Click <b>Turn on microphone</b> and allow access.</li>
+<li>Adjust the two sliders (talking and screaming thresholds) while you speak, until the states switch the way you like.</li>
+<li>Optional: pick a background color, or upload a background image.</li>
+<li>In the <b>Remote control</b> box, type a long, unique room code (for example <code>boolooavatar-x7k29qpm41</code>) and click <b>Connect</b>. You should see <b>Connected ✓</b>.</li>
+</ol>
+
+<h2>Step 3: Use the remote (on your phone)</h2>
+<ol>
+<li>Open the remote address in your phone browser.</li>
+<li>Type the same room code and tap <b>Save</b>.</li>
+<li>Tap the buttons. Emoji buttons trigger emoji reactions. The 🎬 buttons play full-avatar clips. The 🎮 button toggles playing mode.</li>
+<li>Open <b>Edit labels</b> to rename the emoji and clip buttons.</li>
+</ol>
+
+<h2>Step 4: Use it in OBS</h2>
+<ol>
+<li>Keep the main page open in Chrome and press <b>H</b> to show only the avatar (press <b>H</b> or double-click to go back).</li>
+<li>In OBS add a <b>Window Capture</b> source and select the Chrome window.</li>
+<li>Right-click the source, choose <b>Filters</b>, and add <b>Chroma Key</b> (use green if your background is green).</li>
+</ol>
+<p class="note">Alternative: use a <b>Browser Source</b> with the address <code>https://YOURNAME.github.io/boolooavatar/boolooavatar-v3.html?room=YOURCODE#clean</code>. OBS stores files separately from Chrome, so upload your avatar files again inside OBS (right-click the source → <b>Interact</b>). Click once on the avatar in Interact to enable the microphone.</p>
+
+<h2>Reactions</h2>
+<ul>
+<li><b>Emoji reactions</b> (keys 1–5): floating emoji or a small custom image, with an optional sound. Edit them in the custom reactions box.</li>
+<li><b>Clip reactions</b> (keys Q W E R T): up to 5 images or videos per reaction that replace the avatar for a moment, then return. Use the same size and background as your avatar files. The video's own audio is muted.</li>
+</ul>
+
+<h2>Keyboard shortcuts</h2>
+<ul>
+<li><code>P</code> playing mode · <code>H</code> avatar-only mode · <code>1</code>–<code>5</code> emoji reactions · <code>Q W E R T</code> clip reactions</li>
+</ul>
+
+<h2>Good to know</h2>
+<ul>
+<li>The room code and the Remote only work when the files are hosted by you (GitHub Pages) or opened locally. They do not work inside pages hosted on claude.ai.</li>
+<li>The remote uses the free public relay <b>ntfy.sh</b>. The room code is the only secret, so use a long code that nobody can guess.</li>
+<li>Your files are saved in the browser on that device. Another browser or device starts empty.</li>
+<li>Remote control and OBS features were not tested by the author. If something fails, check that the room code is identical in both places.</li>
+</ul>
+</section>
+
+<section id="fa" dir="rtl" lang="fa">
+<h1>Boolooavatar Web (نسخه v3)</h1>
+<p>یه اواتار ساده تحت وب برای استریم. برای هر حالت (بیکار، حرف زدن، بازی، جیغ) تا ۵ تصویر یا ویدیو آپلود می‌کنید و به‌صورت رندوم پخش می‌شن. حالت حرف زدن و جیغ با میکروفون تشخیص داده می‌شه. ریکشن‌های ایموجی و کلیپ‌های تمام‌اواتار هم دارید و می‌تونید از گوشی کنترلشون کنید.</p>
+
+<h2>فایل‌ها</h2>
+<ul>
+<li><code>boolooavatar-v3.html</code>: صفحه اصلی اواتار.</li>
+<li><code>remote.html</code>: صفحه ریموت برای گوشی.</li>
+</ul>
+
+<h2>قدم ۱: گذاشتن فایل‌ها روی GitHub (فقط یه بار)</h2>
+<ol>
+<li>توی github.com یه اکانت رایگان بسازید.</li>
+<li>روی <b>New repository</b> بزنید. اسمش رو <code>boolooavatar</code> بذارید، روی <b>Public</b> بذارید و <b>Create repository</b> رو بزنید.</li>
+<li>روی <b>uploading an existing file</b> بزنید و هر دو فایل رو آپلود کنید. اسم فایل‌ها رو عوض نکنید.</li>
+<li>روی <b>Commit changes</b> بزنید.</li>
+<li>به <b>Settings ← Pages</b> برید. زیر <b>Branch</b>، گزینه <code>main</code> رو انتخاب کنید و <b>Save</b> بزنید.</li>
+<li>یکی دو دقیقه صبر کنید. آدرس‌ها این‌طور می‌شن (به‌جای <code>YOURNAME</code> اسم کاربری گیت‌هابتون رو بذارید):
+<ul>
+<li>صفحه اصلی: <code>https://YOURNAME.github.io/boolooavatar/boolooavatar-v3.html</code></li>
+<li>ریموت: <code>https://YOURNAME.github.io/boolooavatar/remote.html</code></li>
+</ul></li>
+</ol>
+
+<h2>قدم ۲: تنظیم صفحه اصلی (روی کامپیوتر)</h2>
+<ol>
+<li>صفحه اصلی رو توی کروم باز کنید.</li>
+<li>فایل‌های اواتار رو توی هر حالت آپلود کنید. دکمه <b>روشن کردن میکروفون</b> رو بزنید و اجازه بدید.</li>
+<li>وقتی حرف می‌زنید، دو اسلایدر آستانه (حرف زدن و جیغ) رو تنظیم کنید تا حالت‌ها همون‌طور که می‌خواید عوض بشن.</li>
+<li>اختیاری: رنگ پس‌زمینه رو انتخاب کنید یا یه تصویر پس‌زمینه آپلود کنید.</li>
+<li>توی بخش <b>کنترل از راه دور</b>، یه کد اتاق طولانی و مخصوص بنویسید (مثلاً <code>boolooavatar-x7k29qpm41</code>) و <b>اتصال</b> رو بزنید. باید <b>متصل ✓</b> ببینید.</li>
+</ol>
+
+<h2>قدم ۳: استفاده از ریموت (روی گوشی)</h2>
+<ol>
+<li>آدرس ریموت رو توی مرورگر گوشی باز کنید.</li>
+<li>همون کد اتاق رو بنویسید و <b>ذخیره</b> رو بزنید.</li>
+<li>دکمه‌ها رو بزنید. دکمه‌های ایموجی ریکشن ایموجی رو اجرا می‌کنن، دکمه‌های 🎬 کلیپ تمام‌اواتار رو پخش می‌کنن و دکمه 🎮 حالت بازی رو روشن و خاموش می‌کنه.</li>
+<li>از <b>ویرایش برچسب‌ها</b> می‌تونید اسم دکمه‌های ایموجی و کلیپ رو عوض کنید.</li>
+</ol>
+
+<h2>قدم ۴: استفاده توی OBS</h2>
+<ol>
+<li>صفحه اصلی رو توی کروم باز بذارید و کلید <b>H</b> رو بزنید تا فقط اواتار بمونه (برای برگشت دوباره <b>H</b> یا دابل‌کلیک).</li>
+<li>توی OBS یه سورس <b>Window Capture</b> اضافه کنید و پنجره کروم رو انتخاب کنید.</li>
+<li>روی سورس راست‌کلیک کنید، <b>Filters</b> رو بزنید و <b>Chroma Key</b> رو اضافه کنید (اگه پس‌زمینه سبزه، رنگ سبز).</li>
+</ol>
+<p class="note">راه جایگزین: <b>Browser Source</b> با این آدرس: <code>https://YOURNAME.github.io/boolooavatar/boolooavatar-v3.html?room=YOURCODE#clean</code>. فایل‌های OBS جدا از کروم ذخیره می‌شن، پس فایل‌های اواتار رو دوباره داخل خود OBS آپلود کنید (راست‌کلیک روی سورس ← <b>Interact</b>). برای روشن شدن میکروفون، توی Interact یه بار روی اواتار کلیک کنید.</p>
+
+<h2>ریکشن‌ها</h2>
+<ul>
+<li><b>ریکشن‌های ایموجی</b> (کلیدهای ۱ تا ۵): ایموجی شناور یا یه تصویر کوچیک سفارشی، با صدای اختیاری. توی بخش ریکشن‌های سفارشی ویرایششون کنید.</li>
+<li><b>ریکشن‌های کلیپ</b> (کلیدهای Q W E R T): برای هر ریکشن تا ۵ تصویر یا ویدیو که یه لحظه جای اواتار میان و بعد برمی‌گردن. اندازه و پس‌زمینه‌شون رو مثل فایل‌های اواتارتون بگیرید. صدای خود ویدیو بی‌صداست.</li>
+</ul>
+
+<h2>کلیدهای میانبر</h2>
+<ul>
+<li><code>P</code> حالت بازی · <code>H</code> حالت فقط اواتار · <code>1</code> تا <code>5</code> ریکشن ایموجی · <code>Q W E R T</code> ریکشن کلیپ</li>
+</ul>
+
+<h2>نکته‌ها</h2>
+<ul>
+<li>کد اتاق و ریموت فقط وقتی کار می‌کنن که فایل‌ها رو خودتون هاست کرده باشید (GitHub Pages) یا از روی کامپیوتر باز کنید. روی صفحه‌های هاست‌شده داخل claude.ai کار نمی‌کنن.</li>
+<li>ریموت از سرویس رایگان و عمومی <b>ntfy.sh</b> استفاده می‌کنه. تنها رمز ارتباط، کد اتاقه؛ پس یه کد طولانی بذارید که کسی نتونه حدسش بزنه.</li>
+<li>فایل‌ها داخل مرورگر همون دستگاه ذخیره می‌شن. مرورگر یا دستگاه دیگه خالی شروع می‌کنه.</li>
+<li>قابلیت‌های ریموت و OBS توسط سازنده تست نشدن. اگه چیزی کار نکرد، مطمئن بشید کد اتاق توی هر دو جا دقیقاً یکیه.</li>
+</ul>
+</section>
+</main></body></html>
