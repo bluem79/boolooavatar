@@ -46,6 +46,7 @@ img.p{width:46px}.p{position:absolute;bottom:0;font-size:34px;animation:fl 1.8s 
 <div id="slots"></div>
 <p style="color:var(--mu);font-size:12px;margin:0">فایل‌ها داخل مرورگر همین دستگاه ذخیره می‌شن و بعد از بستن صفحه هم می‌مونن.</p><p hidden>فایل‌ها فقط داخل مرورگر نگه داشته می‌شن و با بستن صفحه پاک می‌شن.</p>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <script>
 const REACTIONS=true;
 const $=id=>document.getElementById(id);
@@ -176,26 +177,27 @@ function connectRoom(){
     es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.event==='message')doMsg(JSON.parse(d.message))}catch(e){}}}
   catch(e){$('rs').textContent='خطا'}
 }
-let ws=null,wsT=0,wsLast=0,room='';const seen=new Set();
+const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt'];
+let mqs=[],room='',hbT=0;const seen=new Set();
 function connectRoom(){
-  room=$('rt').value.trim();try{localStorage.setItem('rt',room)}catch(e){}
-  clearTimeout(wsT);if(ws){const o=ws;ws=null;try{o.close()}catch(e){}}
+  room=$('rt').value.trim().replace(/[^\w-]/g,'');$('rt').value=room;
+  try{localStorage.setItem('rt',room)}catch(e){}
+  clearInterval(hbT);mqs.forEach(c=>{try{c.end(true)}catch(e){}});mqs=[];
   if(!room){$('rs').textContent='قطع';return}
-  wsOpen();
+  if(typeof mqtt==='undefined'){$('rs').textContent='کتابخانه لود نشد (اینترنت رو بررسی کنید)';return}
+  const T='boolooavatar/'+room;
+  const st=()=>{const n=mqs.filter(c=>c.connected).length;$('rs').textContent=n?'متصل ✓ ('+n+' سرور)':'در حال اتصال…'};
+  BROKERS.forEach(u=>{
+    const c=mqtt.connect(u,{clientId:'bla_'+Math.random().toString(16).slice(2,10),reconnectPeriod:2000,connectTimeout:8000,keepalive:20,queueQoSZero:false});
+    mqs.push(c);
+    c.on('connect',()=>{c.subscribe(T+'/cmd');st()});
+    c.on('close',st);c.on('error',()=>{});
+    c.on('message',(t,p)=>{try{const m=JSON.parse(p.toString());if(m.id){if(seen.has(m.id))return;seen.add(m.id)}doMsg(m);$('rs').textContent='متصل ✓ پیام: '+new Date().toLocaleTimeString()}catch(e){}});
+  });
+  hbT=setInterval(()=>mqs.forEach(c=>{if(c.connected)c.publish(T+'/hb','1')}),4000);
+  st();
 }
-function wsOpen(){
-  $('rs').textContent='در حال اتصال…';wsLast=Date.now();
-  let w;try{w=new WebSocket('wss://ntfy.sh/'+encodeURIComponent(room)+'/ws')}catch(e){$('rs').textContent='خطا';return}
-  ws=w;
-  w.onopen=()=>{if(w===ws){$('rs').textContent='متصل ✓';wsLast=Date.now()}};
-  w.onmessage=ev=>{wsLast=Date.now();try{const d=JSON.parse(ev.data);if(d.event!=='message'||seen.has(d.id))return;seen.add(d.id);
-    doMsg(JSON.parse(d.message));$('rs').textContent='متصل ✓ پیام: '+new Date().toLocaleTimeString()}catch(e){}};
-  w.onclose=()=>{if(w!==ws)return;$('rs').textContent='قطع شد، تلاش دوباره…';wsT=setTimeout(wsOpen,1500)};
-  w.onerror=()=>{try{w.close()}catch(e){}};
-}
-setInterval(()=>{if(ws&&Date.now()-wsLast>100000){try{ws.close()}catch(e){}}},10000);
 addEventListener('online',()=>{if(room)connectRoom()});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&room&&(!ws||ws.readyState>1))connectRoom()});
 $('rc').onclick=connectRoom;
 {let t=new URLSearchParams(location.search).get('room');try{t=t||localStorage.getItem('rt')}catch(e){}if(t){$('rt').value=t;connectRoom()}}
 if(REACTIONS)for(let i=0;i<5;i++){const b=document.createElement('button');b.textContent='🎬 '+(i+1);b.onclick=()=>playClip(i);$('cb').append(b)}else $('cb').remove();

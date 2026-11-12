@@ -14,9 +14,10 @@ button{cursor:pointer}button:active{background:var(--ac);color:#fff}
 .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
 #ge button{font-size:32px;padding:18px 6px}#gc button{padding:22px 6px}
-</style></head><body><main>
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script></head><body><main>
 <div class="bar"><input id="rt" placeholder="کد اتاق" style="flex:1;direction:ltr"><button id="cn">ذخیره</button></div>
-<small id="st">کد اتاق رو همون کدی بذارید که توی صفحه اصلی نوشتید.</small>
+<small id="cs"></small><br><small id="st">کد اتاق رو همون کدی بذارید که توی صفحه اصلی نوشتید.</small>
 <h3>🙂 ایموجی‌ها</h3><div class="g" id="ge"></div>
 <h3>🎬 کلیپ‌ها</h3><div class="g" id="gc"></div>
 <button id="pl">🎮 روشن/خاموش حالت بازی</button>
@@ -28,12 +29,28 @@ let E=['❤️','😂','😡','👏','😮'],C=['کلیپ ۱','کلیپ ۲','ک�
 try{E=JSON.parse(localStorage.getItem('re'))||E;C=JSON.parse(localStorage.getItem('rcl'))||C;room=localStorage.getItem('rt')||''}catch(e){}
 const q=new URLSearchParams(location.search).get('room');if(q)room=q;
 $('rt').value=room;
-let bc=null;try{bc=new BroadcastChannel('salavatar')}catch(e){}
+const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt'];
+let mqs=[],lastHb=0;
+function connect(){
+  mqs.forEach(c=>{try{c.end(true)}catch(e){}});mqs=[];
+  room=$('rt').value.trim().replace(/[^\w-]/g,'');$('rt').value=room;
+  try{localStorage.setItem('rt',room)}catch(e){}
+  if(!room||typeof mqtt==='undefined')return;
+  const T='boolooavatar/'+room;
+  BROKERS.forEach(u=>{
+    const c=mqtt.connect(u,{clientId:'blr_'+Math.random().toString(16).slice(2,10),reconnectPeriod:2000,connectTimeout:8000,keepalive:20,queueQoSZero:false});
+    mqs.push(c);c.on('connect',()=>c.subscribe(T+'/hb'));c.on('message',()=>{lastHb=Date.now()});c.on('error',()=>{});
+  });
+}
+setInterval(()=>{
+  const n=mqs.filter(c=>c.connected).length;
+  $('cs').textContent=!room?'کد اتاق رو بنویسید و ذخیره بزنید':typeof mqtt==='undefined'?'کتابخانه لود نشد، اینترنت رو بررسی کنید':!n?'🟡 در حال اتصال به سرور…':Date.now()-lastHb<12000?'🟢 صفحه اصلی آنلاینه':'🟠 به سرور وصلم ولی صفحه اصلی پیدا نشد (کد اتاق یکی باشه و صفحه اصلی باز و متصل باشه)';
+},1000);
 function send(m){
   if(navigator.vibrate)navigator.vibrate(25);
-  if(room)fetch('https://ntfy.sh/'+encodeURIComponent(room),{method:'POST',body:JSON.stringify(m)})
-    .then(r=>{$('st').textContent=r.ok?'✓ ارسال شد '+new Date().toLocaleTimeString():'✗ خطا '+r.status+(r.status===429?' (سقف ارسال رایگان پر شده، چند دقیقه صبر کنید)':'')}).catch(()=>$('st').textContent='✗ ارسال نشد، اینترنت رو بررسی کنید');
-  else if(bc){bc.postMessage(m);$('st').textContent='✓ ارسال شد (فقط همین مرورگر)'}
+  m.id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  let n=0;mqs.forEach(c=>{if(c.connected){c.publish('boolooavatar/'+room+'/cmd',JSON.stringify(m));n++}});
+  $('st').textContent=n?'✓ ارسال شد '+new Date().toLocaleTimeString():'✗ هنوز به سرور وصل نیستم';
 }
 function draw(){
   $('ge').innerHTML='';$('gc').innerHTML='';
@@ -43,7 +60,7 @@ function draw(){
 function save(){try{localStorage.setItem('re',JSON.stringify(E));localStorage.setItem('rcl',JSON.stringify(C))}catch(e){}draw()}
 E.forEach((x,i)=>{const t=document.createElement('input');t.value=x;t.maxLength=4;t.oninput=()=>{E[i]=t.value||'⭐';save()};$('ed').append(t)});
 C.forEach((x,i)=>{const t=document.createElement('input');t.value=x;t.maxLength=14;t.oninput=()=>{C[i]=t.value||'کلیپ';save()};$('ed').append(t)});
-$('cn').onclick=()=>{room=$('rt').value.trim();try{localStorage.setItem('rt',room)}catch(e){}$('st').textContent=room?'ذخیره شد ✓':'بدون کد: فقط همین مرورگر'};
+$('cn').onclick=()=>{connect();$('st').textContent=''};
 $('pl').onclick=()=>send({t:'play'});
-draw();
+draw();connect();
 </script></body></html>
