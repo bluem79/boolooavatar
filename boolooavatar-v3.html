@@ -25,6 +25,7 @@ h3{margin:0;font-size:15px}small{color:var(--mu);font-weight:400}
 .meter{height:10px;background:var(--bd);border-radius:9px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:var(--ac)}
 label{display:grid;gap:2px;color:var(--mu);font-size:13px}label.row{display:flex;gap:8px;align-items:center}
 body.clean main>*:not(#stage){display:none}body.clean main{max-width:none;padding:0}body.clean #stage{height:100vh;border-radius:0}body.clean #badge{display:none}
+.hkg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 14px}
 img.p{width:46px}.p{position:absolute;bottom:0;font-size:34px;animation:fl 1.8s ease-out forwards;pointer-events:none}
 @keyframes fl{to{transform:translateY(-48vh) rotate(20deg);opacity:0}}
 .a-bounce{animation:bn .5s}.a-shake{animation:sk .5s}.a-pulse{animation:pu .6s}.a-zoom{animation:zm .5s}
@@ -34,7 +35,7 @@ img.p{width:46px}.p{position:absolute;bottom:0;font-size:34px;animation:fl 1.8s 
 @keyframes zm{50%{transform:scale(1.4)}}
 </style></head><body><main>
 <div id="stage"><div id="bob"><div id="av"><img id="im" alt=""><video id="vd" muted playsinline></video></div></div><p id="ph">برای شروع فایل اضافه کنید</p><div id="badge">—</div></div>
-<div class="bar"><button id="lg">EN</button><button id="mic">🎤 روشن کردن میکروفون</button><button id="cl">🧼 فقط اواتار (H)</button><button id="pl">🎮 حالت بازی (P)</button><label class="row">پس‌زمینه <input type="color" id="bg" value="#00b140"></label><label class="btn">🖼️ تصویر پس‌زمینه<input type="file" id="bgf" accept="image/*" hidden></label><button id="bgx">✕</button></div>
+<div class="bar"><button id="lg">EN</button><button id="mic">🎤 روشن کردن میکروفون</button><button id="cl">🧼 فقط اواتار (H)</button><button id="fs">⛶ تمام‌صفحه (F)</button><button id="pl">🎮 حالت بازی (P)</button><label class="row">پس‌زمینه <input type="color" id="bg" value="#00b140"></label><label class="btn">🖼️ تصویر پس‌زمینه<input type="file" id="bgf" accept="image/*" hidden></label><button id="bgx">✕</button></div>
 <div class="bar" id="rx"></div>
 <div class="bar" id="cb"></div>
 <section class="card"><div class="meter"><i id="lv"></i></div>
@@ -43,6 +44,7 @@ img.p{width:46px}.p{position:absolute;bottom:0;font-size:34px;animation:fl 1.8s 
 <label class="row" id="bw"><input type="checkbox" id="bc" checked> جنبیدن اواتار با صدا</label></section>
 <section class="card" id="rm"><h3>کنترل از راه دور <small id="rs">قطع</small></h3><label class="row">کد اتاق <input id="rt" style="flex:1" placeholder="یه کد طولانی و مخصوص بنویسید"></label><button id="rc">اتصال</button></section>
 <section class="card" id="rxc"></section>
+<section class="card" id="hk"></section>
 <div id="slots"></div>
 <p style="color:var(--mu);font-size:12px;margin:0">فایل‌ها داخل مرورگر همین دستگاه ذخیره می‌شن و بعد از بستن صفحه هم می‌مونن.</p><p hidden>فایل‌ها فقط داخل مرورگر نگه داشته می‌شن و با بستن صفحه پاک می‌شن.</p>
 </main>
@@ -102,10 +104,48 @@ function render(){
       render();setState(cur||base(),true)};
     $('slots').append(c)});
 }
-$('pl').onclick=()=>{playing=!playing;$('pl').classList.toggle('on',playing)};
-addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='p'||e.key==='P')$('pl').click();
-  if(REACTIONS&&RX[+e.key-1])react(RX[+e.key-1]);const ci='qwert'.indexOf(e.key.toLowerCase());if(REACTIONS&&ci>=0&&e.key.length===1)playClip(ci)});
-$('bg').oninput=e=>stage.style.backgroundColor=e.target.value;
+$('pl').onclick=()=>{playing=!playing;$('pl').classList.toggle('on',playing);try{localStorage.setItem('play',playing?'1':'0')}catch(e){}};
+try{if(localStorage.getItem('play')==='1')$('pl').click()}catch(e){}
+const HK_DEF={play:'KeyP',clean:'KeyH',full:'KeyF'};
+for(let i=0;i<5;i++){HK_DEF['e'+i]='Digit'+(i+1);HK_DEF['c'+i]='Key'+'QWERT'[i]}
+let HK={...HK_DEF},hkCap=null;
+try{Object.assign(HK,JSON.parse(localStorage.getItem('hk')||'{}'))}catch(e){}
+const hkSave=()=>{try{localStorage.setItem('hk',JSON.stringify(HK))}catch(e){}};
+const hkName=c=>!c?'—':c.startsWith('Key')?c.slice(3):c.startsWith('Digit')?c.slice(5):c.startsWith('Numpad')?'Num'+c.slice(6):c.replace(/^Arrow/,'');
+function toggleFull(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+$('fs').onclick=toggleFull;
+function hkRun(a){
+  if(a==='play')$('pl').click();else if(a==='clean')setClean(!isClean());else if(a==='full')toggleFull();
+  else if(REACTIONS&&a[0]==='e'&&RX[+a[1]])react(RX[+a[1]]);else if(REACTIONS&&a[0]==='c')playClip(+a[1])}
+function hkAct(){const a=[['play','حالت بازی'],['clean','فقط اواتار'],['full','تمام‌صفحه']];
+  if(REACTIONS){for(let i=0;i<5;i++)a.push(['e'+i,'ریکشن ایموجی '+(i+1)]);for(let i=0;i<5;i++)a.push(['c'+i,'ریکشن کلیپ '+(i+1)])}return a}
+function buildCb(){const el=$('cb');if(!REACTIONS){el.remove();return}el.innerHTML='';
+  for(let i=0;i<5;i++){const b=document.createElement('button');b.textContent='🎬 '+(i+1)+' ['+hkName(HK['c'+i])+']';b.onclick=()=>playClip(i);el.append(b)}}
+function hkRender(){
+  $('pl').textContent='🎮 حالت بازی ('+hkName(HK.play)+')';
+  $('cl').textContent='🧼 فقط اواتار ('+hkName(HK.clean)+')';
+  $('fs').textContent='⛶ تمام‌صفحه ('+hkName(HK.full)+')';
+  if(REACTIONS){buildRxBtns();buildCb()}
+  const c=$('hk');c.innerHTML='<h3>⌨️ کلیدهای میانبر <small>روی دکمه کلیک کنید و کلید جدید رو بزنید (Esc برای لغو)</small></h3>';
+  const g=document.createElement('div');g.className='hkg';
+  hkAct().forEach(([a,n])=>{const r=document.createElement('div');r.className='bar';r.innerHTML='<span style="flex:1"></span><button></button>';
+    r.firstChild.textContent=n;const b=r.lastChild;b.textContent=hkCap===a?'در انتظار کلید…':hkName(HK[a]);b.classList.toggle('on',hkCap===a);
+    b.onclick=()=>{hkCap=a;hkRender()};g.append(r)});
+  c.append(g);
+  const rs=document.createElement('button');rs.textContent='بازنشانی';rs.onclick=()=>{HK={...HK_DEF};hkSave();hkRender()};c.append(rs);
+}
+addEventListener('keydown',e=>{
+  let code=e.code;if(/^Numpad\d$/.test(code))code=code.replace('Numpad','Digit');
+  if(hkCap){e.preventDefault();if(e.key==='Escape'){hkCap=null;hkRender();return}
+    if(/^(Shift|Control|Alt|Meta)/.test(code))return;
+    for(const a in HK)if(HK[a]===code)HK[a]='';HK[hkCap]=code;hkCap=null;hkSave();hkRender();return}
+  const t=e.target;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&!/^(range|checkbox|color|button|file)$/.test(t.type)))return;
+  for(const a in HK)if(HK[a]&&HK[a]===code){e.preventDefault();hkRun(a);break}
+});
+$('bg').oninput=e=>{stage.style.backgroundColor=e.target.value;try{localStorage.setItem('bgc',e.target.value)}catch(x){}};
+try{const v=localStorage.getItem('bgc');if(v){$('bg').value=v;stage.style.backgroundColor=v}}catch(e){}
+try{if(localStorage.getItem('bounce')==='0')$('bc').checked=false}catch(e){}
+$('bc').onchange=()=>{try{localStorage.setItem('bounce',$('bc').checked?'1':'0')}catch(e){}};
 ['tk','sc'].forEach(id=>{try{const v=localStorage.getItem('sl_'+id);if(v)$(id).value=v}catch(e){}$(id).oninput=()=>{try{localStorage.setItem('sl_'+id,$(id).value)}catch(e){}}});
 function setBg(u){stage.style.backgroundImage=u?`url(${u})`:'';stage.style.backgroundSize='cover';stage.style.backgroundPosition='center'}
 $('bgf').onchange=e=>{const f=e.target.files[0];if(!f)return;setBg(URL.createObjectURL(f));dbPut({id:'bgimg',k:'bgimg',blob:f,t:Date.now()})};
@@ -114,10 +154,13 @@ $('mic').onclick=async()=>{
   try{
     const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
     const ac=new AudioContext(),src=ac.createMediaStreamSource(st);analyser=ac.createAnalyser();analyser.fftSize=1024;
-    src.connect(analyser);buf=new Uint8Array(analyser.fftSize);$('mic').textContent='🎤 میکروفون روشنه';$('mic').classList.add('on');
-  }catch(e){alert('دسترسی به میکروفون ممکن نشد. اجازه دسترسی رو بررسی کنید.')}
+    src.connect(analyser);buf=new Uint8Array(analyser.fftSize);$('mic').textContent='🎤 میکروفون روشنه';$('mic').classList.add('on');window._ac=ac;window._autoMic=false;try{localStorage.setItem('mic','1')}catch(e){}
+  }catch(e){if(!window._autoMic)alert('دسترسی به میکروفون ممکن نشد. اجازه دسترسی رو بررسی کنید.');window._autoMic=false}
 };
+addEventListener('pointerdown',()=>{if(window._ac&&window._ac.state==='suspended')window._ac.resume().catch(()=>{})});
+try{if(localStorage.getItem('mic')==='1'){window._autoMic=true;$('mic').click()}}catch(e){}
 function frame(){
+  if(window._ac&&window._ac.state==='suspended')window._ac.resume().catch(()=>{});
   if(analyser){analyser.getByteTimeDomainData(buf);let s=0;for(const b of buf){const v=(b-128)/128;s+=v*v}
     const r=Math.sqrt(s/buf.length);lvl=Math.min(100,r*200)}
   else lvl=0;
@@ -143,7 +186,7 @@ function react(r){if(r.snd){const a=new Audio(r.snd);a.play().catch(()=>{})}
     s.style.left=(8+Math.random()*80)+'%';s.style.animationDelay=Math.random()*.4+'s';stage.append(s);setTimeout(()=>s.remove(),2400)}
   av.classList.remove('a-bounce','a-shake','a-pulse','a-zoom');void av.offsetWidth;av.classList.add(r[1]);
 }
-function buildRxBtns(){$('rx').innerHTML='';RX.forEach((r,i)=>{const b=document.createElement('button');b.textContent=`${r[0]} ${i+1}`;b.onclick=()=>react(r);$('rx').append(b)})}
+function buildRxBtns(){$('rx').innerHTML='';RX.forEach((r,i)=>{const b=document.createElement('button');b.textContent=`${r[0]} [${hkName(HK['e'+i])}]`;b.onclick=()=>react(r);$('rx').append(b)})}
 function setRx(i,t,f){const r=RX[i],id='rx'+t+i;if(r[t])URL.revokeObjectURL(r[t]);r[t]=URL.createObjectURL(f);dbPut({id,k:id,blob:f,t:Date.now()});renderRx()}
 function renderRx(){
   const c=$('rxc');if(!REACTIONS){c&&c.remove();return}
@@ -164,7 +207,6 @@ const setClean=on=>{document.body.classList.toggle('clean',on);try{history.repla
 $('cl').onclick=()=>setClean(true);
 stage.ondblclick=()=>isClean()&&setClean(false);
 stage.onclick=()=>{if(isClean()&&!analyser)$('mic').click()};
-addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='h'||e.key==='H')setClean(!isClean())});
 addEventListener('hashchange',()=>setClean(location.hash==='#clean'));
 if(location.hash==='#clean')setClean(true);
 function doMsg(m){if(m.t==='react'&&RX[m.i])react(RX[m.i]);else if(m.t==='clip')playClip(m.i);else if(m.t==='play')$('pl').click()}
@@ -210,7 +252,7 @@ fetch('/ping').then(r=>r.ok?r.text():'').then(t=>{
 }).catch(()=>{});
 $('rc').onclick=connectRoom;
 {let t=new URLSearchParams(location.search).get('room');try{t=t||localStorage.getItem('rt')}catch(e){}if(t){$('rt').value=t;connectRoom()}}
-if(REACTIONS)for(let i=0;i<5;i++){const b=document.createElement('button');b.textContent='🎬 '+(i+1);b.onclick=()=>playClip(i);$('cb').append(b)}else $('cb').remove();
+hkRender();
 render();renderRx();setState('idle',true);frame();
 /* ===== i18n (fa/en) ===== */
 const I18N=[
@@ -239,7 +281,11 @@ const I18N=[
 ['به سرور وصلم ولی صفحه اصلی پیدا نشد (کد اتاق یکی باشه و صفحه اصلی باز و متصل باشه)','Connected to the server but the main page was not found (use the same room code and keep the main page open and connected)'],
 ['به کامپیوتر وصلم ولی صفحه اصلی باز نیست','Connected to the computer but the main page is not open'],
 ['به کامپیوتر وصل نیستم','Not connected to the computer'],['هنوز به سرور وصل نیستم','Not connected to the server yet'],
-['ارسال شد','Sent'],['خطا','Error'],['ریموت','Remote']
+['ارسال شد','Sent'],['خطا','Error'],['ریموت','Remote'],
+['تمام‌صفحه','Fullscreen'],['کلیدهای میانبر','Hotkeys'],
+['روی دکمه کلیک کنید و کلید جدید رو بزنید (Esc برای لغو)','Click a button, then press the new key (Esc to cancel)'],
+['بازنشانی','Reset'],['در انتظار کلید…','Press a key…'],
+['ریکشن ایموجی','Emoji reaction'],['ریکشن کلیپ','Clip reaction']
 ];
 const nz=s=>s.replace(/\u200c/g,'');
 const DICT=I18N.map(([a,b])=>[nz(a),b]).sort((x,y)=>y[0].length-x[0].length);
