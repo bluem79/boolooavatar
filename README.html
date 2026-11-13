@@ -72,6 +72,7 @@ nav a{color:var(--ac);margin-inline-end:14px}
 </ul>
 
 <h2>Keyboard shortcuts</h2>
+<p class="note">All keys can be changed in the <b>Hotkeys</b> box on the page (click a button, then press the new key). <code>F</code> toggles fullscreen. Hotkeys only work while the browser window is focused. To capture the avatar in OBS without browser bars, start Chrome in app mode: <code>chrome.exe --app=http://localhost:8765/#clean</code> (or your own address), then use Window Capture. The microphone is only analysed for volume. Its sound is never played back by the page.</p>
 <ul>
 <li><code>P</code> playing mode · <code>H</code> avatar-only mode · <code>1</code>–<code>5</code> emoji reactions · <code>Q W E R T</code> clip reactions</li>
 </ul>
@@ -85,6 +86,13 @@ nav a{color:var(--ac);margin-inline-end:14px}
 <li>Open a terminal in that folder and run <code>python server.py</code>. Keep the window open. Allow it through the firewall if Windows asks (private networks).</li>
 <li>The window prints your addresses. On the PC open <code>http://localhost:8765/</code>. In OBS use <code>http://localhost:8765/#clean</code>. On your phone open <code>http://YOUR-PC-IP:8765/remote</code> (the exact address is printed).</li>
 <li>No room code is needed in this mode. The status text says <b>Connected (local)</b>. Upload your avatar files again once, because this address has its own storage.</li>
+</ol>
+<h2>Kick channel points (local mode)</h2>
+<p>With the local server running, any tool can trigger the avatar by opening a link on your PC: <code>http://localhost:8765/trigger?clip=1</code> plays clip reaction 1 (use 1–5). <code>?emoji=1</code> triggers emoji reaction 1 and <code>?play=1</code> toggles playing mode. A free tool like Streamer.bot can call this link when a viewer redeems a Kick channel point reward:</p>
+<ol>
+<li>Create a reward in your Kick dashboard (for example "Rock hits me") and upload the rock video in the matching Clip slot of the avatar page.</li>
+<li>Install Streamer.bot and sign in to your Kick account inside it.</li>
+<li>Create an Action with the Kick <b>Reward Redemption</b> trigger (choose your reward) and a <b>Fetch URL</b> sub-action pointing to <code>http://localhost:8765/trigger?clip=1</code>.</li>
 </ol>
 <h2>Good to know</h2>
 <ul>
@@ -151,6 +159,7 @@ nav a{color:var(--ac);margin-inline-end:14px}
 </ul>
 
 <h2>کلیدهای میانبر</h2>
+<p class="note">همه کلیدها رو می‌تونید از بخش <b>کلیدهای میانبر</b> توی صفحه عوض کنید (روی دکمه کلیک کنید و کلید جدید رو بزنید). کلید <code>F</code> تمام‌صفحه رو روشن و خاموش می‌کنه. میانبرها فقط وقتی کار می‌کنن که پنجره مرورگر فوکوس داشته باشه. برای گرفتن اواتار توی OBS بدون نوار مرورگر، کروم رو با حالت اپ اجرا کنید: <code>chrome.exe --app=http://localhost:8765/#clean</code> (یا آدرس خودتون) و بعد Window Capture بزنید. میکروفون فقط برای تشخیص بلندی صدا تحلیل می‌شه و صداش هیچ‌وقت پخش نمی‌شه.</p>
 <ul>
 <li><code>P</code> حالت بازی · <code>H</code> حالت فقط اواتار · <code>1</code> تا <code>5</code> ریکشن ایموجی · <code>Q W E R T</code> ریکشن کلیپ</li>
 </ul>
@@ -164,6 +173,13 @@ nav a{color:var(--ac);margin-inline-end:14px}
 <li>توی همون پوشه یه ترمینال باز کنید و <code>python server.py</code> رو اجرا کنید. پنجره رو باز نگه دارید. اگه ویندوز درباره فایروال پرسید، اجازه بدید (شبکه خصوصی).</li>
 <li>پنجره آدرس‌ها رو چاپ می‌کنه. روی کامپیوتر <code>http://localhost:8765/</code> رو باز کنید. توی OBS آدرس <code>http://localhost:8765/#clean</code> رو بذارید. روی گوشی <code>http://IP-کامپیوتر:8765/remote</code> رو باز کنید (آدرس دقیق چاپ می‌شه).</li>
 <li>توی این حالت کد اتاق لازم نیست و وضعیت «متصل محلی ✓» رو نشون می‌ده. فایل‌های اواتار رو یه بار دوباره آپلود کنید، چون این آدرس حافظه جداگانه داره.</li>
+</ol>
+<h2>پوینت‌های کانال Kick (حالت محلی)</h2>
+<p>وقتی سرور محلی روشنه، هر ابزاری می‌تونه با باز کردن یه لینک روی کامپیوتر خودتون اواتار رو اجرا کنه: <code>http://localhost:8765/trigger?clip=1</code> کلیپ ریکشن ۱ رو پخش می‌کنه (عدد ۱ تا ۵). <code>?emoji=1</code> ریکشن ایموجی ۱ و <code>?play=1</code> حالت بازی رو روشن و خاموش می‌کنه. یه ابزار رایگان مثل Streamer.bot می‌تونه وقتی تماشاگر پوینت Kick رو خرج می‌کنه این لینک رو صدا بزنه:</p>
+<ol>
+<li>توی داشبورد Kick یه پاداش بسازید (مثلاً «سنگ بخور تو سرم») و ویدیوی سنگ رو توی همون شماره کلیپ صفحه اواتار آپلود کنید.</li>
+<li>Streamer.bot رو نصب کنید و داخلش به اکانت Kick وارد بشید.</li>
+<li>یه Action بسازید با تریگر Kick از نوع <b>Reward Redemption</b> (پاداش‌تون رو انتخاب کنید) و یه ساب‌اکشن <b>Fetch URL</b> با آدرس <code>http://localhost:8765/trigger?clip=1</code>.</li>
 </ol>
 <h2>نکته‌ها</h2>
 <ul>

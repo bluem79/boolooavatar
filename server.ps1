@@ -72,6 +72,15 @@ public class BServer
                 Text(c, n.ToString(), 200);
                 return;
             }
+            if (p == "/trigger")
+            {
+                string q;
+                if ((q = c.Request.QueryString["clip"]) != null) Broadcast("{\"t\":\"clip\",\"i\":" + Idx(q) + "}");
+                else if ((q = c.Request.QueryString["emoji"]) != null) Broadcast("{\"t\":\"react\",\"i\":" + Idx(q) + "}");
+                else if (c.Request.QueryString["play"] != null) Broadcast("{\"t\":\"play\"}");
+                Text(c, "ok", 200);
+                return;
+            }
             if (p == "/events") { Events(c); return; }
             if (p == "/cmd" && c.Request.HttpMethod == "POST")
             {
@@ -123,6 +132,16 @@ public class BServer
             lock (lk) { clients.Remove(sw); }
             try { resp.Abort(); } catch (Exception) { }
         }
+    }
+
+    static int Idx(string s)
+    {
+        int n;
+        if (!int.TryParse(s, out n)) n = 1;
+        n = n - 1;
+        if (n < 0) n = 0;
+        if (n > 4) n = 4;
+        return n;
     }
 
     static void Broadcast(string msg)

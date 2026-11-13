@@ -27,6 +27,20 @@ class H(http.server.BaseHTTPRequestHandler):
         if p == '/status':
             with lock:
                 return self.send_text(str(len(clients)))
+        if p == '/trigger':
+            from urllib.parse import parse_qs
+            qs = parse_qs(self.path.split('?', 1)[1]) if '?' in self.path else {}
+            def idx(v):
+                try: return max(0, min(4, int(v[0]) - 1))
+                except Exception: return 0
+            if 'clip' in qs: m = '{"t":"clip","i":%d}' % idx(qs['clip'])
+            elif 'emoji' in qs: m = '{"t":"react","i":%d}' % idx(qs['emoji'])
+            elif 'play' in qs: m = '{"t":"play"}'
+            else: m = None
+            if m:
+                with lock:
+                    for c in clients: c.put(m)
+            return self.send_text('ok')
         if p == '/events':
             q = queue.Queue()
             with lock:
