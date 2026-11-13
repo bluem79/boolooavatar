@@ -79,11 +79,31 @@ function setState(s,force){
   if(pool.length>1&&i===lastIdx[k])i=(i+1+Math.floor(Math.random()*(pool.length-1)))%pool.length;
   lastIdx[k]=i;show(pool[i],pool.length<2);
 }
+const thQ=[];let thBusy=false;
+function thumbFor(o,img){if(o.th){img.src=o.th;return}thQ.push([o,img]);if(!thBusy)thNext()}
+function thNext(){
+  const j=thQ.shift();if(!j){thBusy=false;return}thBusy=true;const o=j[0],img=j[1];
+  if(o.th){img.src=o.th;thNext();return}
+  let fd=false,to=0;
+  const put=(src,w,h)=>{try{const c=document.createElement('canvas');c.width=96;c.height=Math.max(1,Math.round(96*(h||1)/(w||1)));
+    c.getContext('2d').drawImage(src,0,0,c.width,c.height);o.th=c.toDataURL('image/png');img.src=o.th}catch(e){}};
+  const fin=()=>{if(fd)return;fd=true;clearTimeout(to);setTimeout(thNext,20)};
+  to=setTimeout(fin,5000);
+  if(o.v){
+    const v=document.createElement('video');v.muted=true;v.preload='auto';v.playsInline=true;
+    const done=()=>{v.onloadeddata=v.onseeked=v.onerror=null;v.removeAttribute('src');v.load();fin()};
+    v.onloadeddata=()=>{try{v.currentTime=Math.min(.2,(v.duration||1)/2)}catch(e){done()}};
+    v.onseeked=()=>{put(v,v.videoWidth,v.videoHeight);done()};
+    v.onerror=done;v.src=o.url;
+  }else{
+    const m=new Image();m.onload=()=>{put(m,m.naturalWidth,m.naturalHeight);m.src='';fin()};m.onerror=fin;m.src=o.url;
+  }
+}
 function show(it,loop){
-  if(!it){im.style.display=vd.style.display='none';vd.pause();ph.style.display='';return}
+  if(!it){im.style.display=vd.style.display='none';vd.pause();vd.removeAttribute('src');vd.load();ph.style.display='';return}
   ph.style.display='none';
   if(it.v){im.style.display='none';vd.style.display='block';vd.loop=loop;vd.src=it.url;vd.play().catch(()=>{})}
-  else{vd.pause();vd.style.display='none';im.style.display='block';im.src=it.url}
+  else{vd.pause();vd.removeAttribute('src');vd.load();vd.style.display='none';im.style.display='block';im.src=it.url}
 }
 vd.onended=()=>{if(ovr)endOvr();else setState(cur,true)};
 setInterval(()=>{if(im.style.display==='block')setState(cur,true)},6000);
@@ -95,7 +115,7 @@ function render(){
     const th=c.querySelector('.th');
     files[k].forEach((f,i)=>{
       const t=document.createElement('div');t.className='t';
-      t.innerHTML=f.v?`<video src="${f.url}" muted></video>`:`<img src="${f.url}" alt="">`;
+      t.innerHTML='<img alt="">';thumbFor(f,t.firstChild);
       const x=document.createElement('button');x.textContent='×';
       x.onclick=()=>{URL.revokeObjectURL(f.url);dbDel(f.id);files[k].splice(i,1);render();setState(cur||base(),true)};
       t.append(x);th.append(t)});
