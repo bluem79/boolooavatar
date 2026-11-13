@@ -38,8 +38,8 @@ img.p{width:46px}.p{position:absolute;bottom:0;font-size:34px;animation:fl 1.8s 
 <div class="bar" id="rx"></div>
 <div class="bar" id="cb"></div>
 <section class="card"><div class="meter"><i id="lv"></i></div>
-<label>آستانه حرف زدن <input type="range" id="tk" min="1" max="100" value="12"></label>
-<label>آستانه جیغ <input type="range" id="sc" min="1" max="100" value="45"></label>
+<label>آستانه حرف زدن <input type="range" id="tk" min="1" max="100" value="30"></label>
+<label>آستانه جیغ <input type="range" id="sc" min="1" max="100" value="70"></label>
 <label class="row" id="bw"><input type="checkbox" id="bc" checked> جنبیدن اواتار با صدا</label></section>
 <section class="card" id="rm"><h3>کنترل از راه دور <small id="rs">قطع</small></h3><label class="row">کد اتاق <input id="rt" style="flex:1" placeholder="یه کد طولانی و مخصوص بنویسید"></label><button id="rc">اتصال</button></section>
 <section class="card" id="rxc"></section>
@@ -106,6 +106,7 @@ $('pl').onclick=()=>{playing=!playing;$('pl').classList.toggle('on',playing)};
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='p'||e.key==='P')$('pl').click();
   if(REACTIONS&&RX[+e.key-1])react(RX[+e.key-1]);const ci='qwert'.indexOf(e.key.toLowerCase());if(REACTIONS&&ci>=0&&e.key.length===1)playClip(ci)});
 $('bg').oninput=e=>stage.style.backgroundColor=e.target.value;
+['tk','sc'].forEach(id=>{try{const v=localStorage.getItem('sl_'+id);if(v)$(id).value=v}catch(e){}$(id).oninput=()=>{try{localStorage.setItem('sl_'+id,$(id).value)}catch(e){}}});
 function setBg(u){stage.style.backgroundImage=u?`url(${u})`:'';stage.style.backgroundSize='cover';stage.style.backgroundPosition='center'}
 $('bgf').onchange=e=>{const f=e.target.files[0];if(!f)return;setBg(URL.createObjectURL(f));dbPut({id:'bgimg',k:'bgimg',blob:f,t:Date.now()})};
 $('bgx').onclick=()=>{setBg('');dbDel('bgimg')};
@@ -118,7 +119,7 @@ $('mic').onclick=async()=>{
 };
 function frame(){
   if(analyser){analyser.getByteTimeDomainData(buf);let s=0;for(const b of buf){const v=(b-128)/128;s+=v*v}
-    const r=Math.sqrt(s/buf.length);lvl=Math.min(100,r*300)}
+    const r=Math.sqrt(s/buf.length);lvl=Math.min(100,r*200)}
   else lvl=0;
   $('lv').style.width=lvl+'%';
   const now=performance.now(),tk=+$('tk').value,sc=+$('sc').value,b=base();
